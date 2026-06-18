@@ -1,0 +1,3288 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+<meta name="theme-color" content="#6366f1" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>Home Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --primary-light: #eef2ff;
+    --success: #10b981;
+    --success-light: #d1fae5;
+    --warning: #f59e0b;
+    --warning-light: #fef3c7;
+    --danger: #ef4444;
+    --danger-light: #fee2e2;
+    --info: #3b82f6;
+    --info-light: #dbeafe;
+    --purple: #8b5cf6;
+    --purple-light: #ede9fe;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
+    --radius: 14px;
+    --radius-sm: 10px;
+    --radius-lg: 20px;
+    --safe-bottom: env(safe-area-inset-bottom, 0);
+    --safe-top: env(safe-area-inset-top, 0);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-800);
+    line-height: 1.55;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  button, input, select, textarea {
+    font-family: inherit;
+    font-size: 16px; /* prevent zoom on iOS */
+  }
+
+  /* ============= LAYOUT ============= */
+  .app {
+    min-height: 100vh;
+    padding-bottom: calc(76px + var(--safe-bottom));
+  }
+
+  /* Top bar */
+  .topbar {
+    position: sticky;
+    top: 0;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--gray-100);
+    padding: calc(12px + var(--safe-top)) 16px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 50;
+    min-height: 56px;
+  }
+
+  .topbar-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .topbar-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .icon-btn-top {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: none;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.15s;
+  }
+
+  .icon-btn-top:active {
+    transform: scale(0.95);
+    background: var(--gray-200);
+  }
+
+  /* Save indicator */
+  .save-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: var(--success-light);
+    color: var(--success);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .save-indicator.show { opacity: 1; }
+  .save-indicator.saving {
+    background: var(--warning-light);
+    color: var(--warning);
+  }
+  .save-indicator .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Main content */
+  .content {
+    padding: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* Bottom navigation */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-top: 1px solid var(--gray-100);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    padding: 8px 4px calc(8px + var(--safe-bottom));
+    z-index: 50;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
+  }
+
+  .nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 4px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--gray-500);
+    border-radius: 8px;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .nav-btn:active {
+    transform: scale(0.92);
+  }
+
+  .nav-btn.active {
+    color: var(--primary);
+  }
+
+  .nav-btn.active::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 0 0 4px 4px;
+  }
+
+  .nav-icon {
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .nav-badge {
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(8px);
+    background: var(--danger);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 8px;
+    min-width: 14px;
+    text-align: center;
+  }
+
+  /* ============= COMPONENTS ============= */
+  .card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-100);
+    margin-bottom: 12px;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-800);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin: 16px 4px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .page-header {
+    margin-bottom: 8px;
+  }
+
+  .page-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--gray-900);
+    margin-bottom: 2px;
+  }
+
+  .page-subtitle {
+    color: var(--gray-500);
+    font-size: 13px;
+  }
+
+  /* Stats grid */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 14px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-100);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--primary);
+  }
+
+  .stat-card.success::before { background: var(--success); }
+  .stat-card.warning::before { background: var(--warning); }
+  .stat-card.danger::before { background: var(--danger); }
+  .stat-card.info::before { background: var(--info); }
+  .stat-card.purple::before { background: var(--purple); }
+
+  .stat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--gray-900);
+    line-height: 1.2;
+  }
+
+  .stat-value.small { font-size: 18px; }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+
+  /* Tasks */
+  .task-list {
+    list-style: none;
+  }
+
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-100);
+    min-height: 48px;
+  }
+
+  .task-item:last-child { border-bottom: none; }
+
+  .task-check {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    border-radius: 7px;
+    border: 2px solid var(--gray-300);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    background: white;
+  }
+
+  .task-check.checked {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+    font-size: 14px;
+  }
+
+  .task-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .task-title {
+    font-weight: 500;
+    color: var(--gray-800);
+    word-break: break-word;
+    font-size: 14px;
+  }
+
+  .task-title.done {
+    text-decoration: line-through;
+    color: var(--gray-400);
+  }
+
+  .task-meta {
+    font-size: 11px;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+
+  .task-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gray-400);
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+
+  .task-delete:active {
+    background: var(--danger-light);
+    color: var(--danger);
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 12px 18px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+  .btn-primary:active { background: var(--primary-dark); transform: scale(0.98); }
+
+  .btn-secondary {
+    background: var(--gray-100);
+    color: var(--gray-700);
+  }
+  .btn-secondary:active { background: var(--gray-200); }
+
+  .btn-danger {
+    background: var(--danger);
+    color: white;
+  }
+
+  .btn-sm {
+    padding: 8px 14px;
+    font-size: 13px;
+    min-height: 36px;
+  }
+
+  .btn-fab {
+    position: fixed;
+    bottom: calc(96px + var(--safe-bottom));
+    left: 16px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-fab:active { transform: scale(0.95); background: var(--primary-dark); }
+
+  /* Inputs */
+  .input, .select, .textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    color: var(--gray-800);
+    background: white;
+    transition: all 0.15s;
+  }
+
+  .input:focus, .select:focus, .textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+  }
+
+  .textarea { resize: vertical; min-height: 80px; }
+
+  .form-group { margin-bottom: 12px; }
+
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 6px;
+  }
+
+  /* Quick add */
+  .quick-add {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .quick-add input { flex: 1; }
+
+  /* Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .badge-new-lead, .badge-ongoing { background: var(--info-light); color: #1e40af; }
+  .badge-contacted { background: var(--primary-light); color: var(--primary-dark); }
+  .badge-replied { background: var(--purple-light); color: #6d28d9; }
+  .badge-interested { background: var(--warning-light); color: #92400e; }
+  .badge-meeting { background: #fce7f3; color: #9f1239; }
+  .badge-proposal-sent { background: #cffafe; color: #155e75; }
+  .badge-won, .badge-paid { background: var(--success-light); color: #065f46; }
+  .badge-lost { background: var(--danger-light); color: #991b1b; }
+  .badge-support { background: var(--purple-light); color: #6d28d9; }
+  .badge-pending { background: var(--warning-light); color: #92400e; }
+  .badge-high { background: var(--danger-light); color: #991b1b; }
+  .badge-medium { background: var(--warning-light); color: #92400e; }
+  .badge-low { background: var(--gray-100); color: var(--gray-600); }
+
+  /* Mobile card list (instead of tables) */
+  .item-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .item-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 14px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-100);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .item-card:active { transform: scale(0.99); background: var(--gray-50); }
+
+  .item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .item-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+  }
+
+  .item-meta {
+    font-size: 12px;
+    color: var(--gray-500);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .item-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  /* Bottom sheet / modal */
+  .sheet-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    animation: fadeIn 0.2s;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .sheet {
+    background: white;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    width: 100%;
+    max-width: 600px;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 16px 16px calc(24px + var(--safe-bottom));
+    animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--gray-300);
+    border-radius: 2px;
+    margin: 0 auto 12px;
+  }
+
+  .sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .sheet-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+
+  .sheet-close {
+    background: var(--gray-100);
+    border: none;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-600);
+    font-size: 16px;
+  }
+
+  .sheet-footer {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-100);
+  }
+
+  .sheet-footer .btn { flex: 1; }
+
+  /* Login overlay */
+  .login-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #1e1b4b, #312e81, #4338ca);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .login-box {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+  }
+
+  .login-logo {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--primary), var(--purple));
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+    color: white;
+    margin: 0 auto 16px;
+  }
+
+  .login-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+  }
+
+  .login-subtitle {
+    color: var(--gray-500);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .pin-input {
+    width: 100%;
+    padding: 16px;
+    font-size: 24px;
+    text-align: center;
+    letter-spacing: 8px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  .pin-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+  }
+
+  .pin-error {
+    color: var(--danger);
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 18px;
+    margin-bottom: 8px;
+  }
+
+  /* Loading screen */
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: white;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: calc(90px + var(--safe-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--gray-900);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    z-index: 200;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+
+  /* Empty state */
+  .empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--gray-400);
+  }
+
+  .empty-icon {
+    font-size: 36px;
+    margin-bottom: 6px;
+    opacity: 0.6;
+  }
+
+  /* Detail rows */
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 14px;
+  }
+
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label { color: var(--gray-500); font-size: 13px; }
+  .detail-value { color: var(--gray-800); font-weight: 600; }
+
+  /* Goals */
+  .goal-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-100);
+    margin-bottom: 10px;
+  }
+
+  .goal-progress {
+    height: 8px;
+    background: var(--gray-100);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+
+  .goal-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--purple));
+    border-radius: 4px;
+    transition: width 0.5s;
+  }
+
+  .goal-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 12px;
+  }
+
+  .goal-current { font-weight: 700; color: var(--gray-800); }
+  .goal-target { color: var(--gray-500); }
+
+  /* Brain dump */
+  .brain-item {
+    background: white;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    border-right: 4px solid var(--primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .brain-item.saas { border-right-color: var(--info); }
+  .brain-item.content { border-right-color: var(--purple); }
+  .brain-item.automation { border-right-color: var(--warning); }
+  .brain-item.business { border-right-color: var(--success); }
+  .brain-item.meeting { border-right-color: var(--danger); }
+
+  .brain-content { flex: 1; min-width: 0; }
+  .brain-title { font-weight: 600; color: var(--gray-800); margin-bottom: 4px; font-size: 14px; }
+  .brain-meta { font-size: 11px; color: var(--gray-400); }
+
+  /* Pipeline */
+  .pipeline {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .pipeline-col {
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    padding: 10px;
+    min-width: 220px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+
+  .pipeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--gray-200);
+  }
+
+  .pipeline-title { font-size: 13px; font-weight: 700; color: var(--gray-700); }
+  .pipeline-count {
+    background: var(--gray-200);
+    color: var(--gray-700);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .pipeline-card {
+    background: white;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+    font-size: 13px;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+  }
+
+  .pipeline-card:active { transform: scale(0.98); }
+  .pipeline-card-title { font-weight: 600; color: var(--gray-800); margin-bottom: 2px; }
+  .pipeline-card-meta { font-size: 11px; color: var(--gray-500); }
+
+  /* Number pill */
+  .number-pill {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  /* Color helpers */
+  .text-success { color: var(--success); }
+  .text-danger { color: var(--danger); }
+  .text-warning { color: var(--warning); }
+  .text-muted { color: var(--gray-500); }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--gray-100);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+    overflow-x: auto;
+  }
+
+  .tab {
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-600);
+    transition: all 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tab.active {
+    background: white;
+    color: var(--gray-900);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Note item */
+  .note-item {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #78350f;
+  }
+
+  .note-meta {
+    font-size: 11px;
+    color: #92400e;
+    margin-top: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* SOP */
+  .sop-item {
+    background: white;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border: 1px solid var(--gray-100);
+    cursor: pointer;
+  }
+
+  .sop-item:active { transform: scale(0.99); background: var(--gray-50); }
+
+  .sop-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-800);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sop-preview {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-top: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Review input row */
+  .review-day {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    background: var(--gray-50);
+    margin-bottom: 8px;
+  }
+
+  /* Money row */
+  .finance-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .finance-row:last-child { border-bottom: none; }
+
+  /* Hide scrollbar in pipeline */
+  .pipeline::-webkit-scrollbar { display: none; }
+  .pipeline { scrollbar-width: none; }
+
+  /* Toast & helpers */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .link-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    border-radius: 6px;
+    font-size: 12px;
+    text-decoration: none;
+    margin: 2px;
+  }
+
+  /* Larger screens - tablet/desktop */
+  @media (min-width: 768px) {
+    .content { padding: 24px; }
+    .stat-grid { grid-template-columns: repeat(4, 1fr); }
+    .topbar-title { font-size: 20px; }
+    .page-title { font-size: 26px; }
+    .bottom-nav { display: none; }
+    .app { padding-bottom: 0; }
+    .btn-fab { bottom: 24px; }
+    .sheet {
+      border-radius: var(--radius-lg);
+      margin: auto;
+      max-width: 560px;
+    }
+    .sheet-overlay {
+      align-items: center;
+    }
+  }
+
+  /* ============= DARK MODE ============= */
+  body.dark {
+    --gray-50: #0b1220;
+    --gray-100: #111a2e;
+    --gray-200: #1f2a44;
+    --gray-300: #334155;
+    --gray-400: #475569;
+    --gray-500: #64748b;
+    --gray-600: #94a3b8;
+    --gray-700: #cbd5e1;
+    --gray-800: #e2e8f0;
+    --gray-900: #f8fafc;
+    --primary-light: rgba(99, 102, 241, 0.18);
+    --success-light: rgba(16, 185, 129, 0.18);
+    --warning-light: rgba(245, 158, 11, 0.18);
+    --danger-light: rgba(239, 68, 68, 0.18);
+    --info-light: rgba(59, 130, 246, 0.18);
+    --purple-light: rgba(139, 92, 246, 0.18);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+    --shadow: 0 2px 8px rgba(0,0,0,0.4);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.5);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.6);
+    background: var(--gray-50);
+    color: var(--gray-800);
+  }
+
+  /* Smooth transitions when toggling theme */
+  body, .card, .topbar, .bottom-nav,
+  .input, .select, .textarea, .sheet, .stat-card,
+  .item-card, .pipeline-card, .sop-item, .brain-item,
+  .goal-card, .note-item, .tab, .review-day, .quick-add,
+  .task-check, .daily-stats-row, .icon-btn-top {
+    transition: background 0.25s, color 0.25s, border-color 0.25s;
+  }
+
+  /* Dark mode overrides */
+  body.dark .topbar {
+    background: rgba(11, 18, 32, 0.92);
+    border-bottom-color: var(--gray-200);
+  }
+  body.dark .bottom-nav {
+    background: rgba(11, 18, 32, 0.96);
+    border-top-color: var(--gray-200);
+  }
+  body.dark .card,
+  body.dark .stat-card,
+  body.dark .item-card,
+  body.dark .sop-item,
+  body.dark .brain-item,
+  body.dark .goal-card,
+  body.dark .pipeline-card,
+  body.dark .daily-stats-row {
+    background: var(--gray-100);
+    border-color: var(--gray-200);
+  }
+  body.dark .sheet {
+    background: var(--gray-100);
+  }
+  body.dark .sheet-overlay,
+  body.dark .modal-overlay {
+    background: rgba(0,0,0,0.7);
+  }
+  body.dark .input,
+  body.dark .select,
+  body.dark .textarea {
+    background: var(--gray-200);
+    border-color: var(--gray-300);
+    color: var(--gray-900);
+  }
+  body.dark .input:focus,
+  body.dark .select:focus,
+  body.dark .textarea:focus {
+    border-color: var(--primary);
+  }
+  body.dark .task-check {
+    background: var(--gray-200);
+    border-color: var(--gray-400);
+  }
+  body.dark .tabs {
+    background: var(--gray-200);
+  }
+  body.dark .tab {
+    color: var(--gray-500);
+  }
+  body.dark .tab.active {
+    background: var(--gray-100);
+    color: var(--gray-900);
+  }
+  body.dark .review-day {
+    background: var(--gray-200);
+  }
+  body.dark .icon-btn-top {
+    background: var(--gray-200);
+    color: var(--gray-700);
+  }
+  body.dark .btn-secondary {
+    background: var(--gray-200);
+    color: var(--gray-800);
+  }
+  body.dark .btn-secondary:active { background: var(--gray-300); }
+  body.dark .note-item {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: #fbbf24;
+  }
+  body.dark .note-meta { color: rgba(251, 191, 36, 0.7); }
+  body.dark .detail-row,
+  body.dark .finance-row,
+  body.dark .task-item,
+  body.dark .card-header,
+  body.dark .sheet-footer {
+    border-color: var(--gray-200);
+  }
+  body.dark .stat-value { color: var(--gray-900); }
+  body.dark .stat-label { color: var(--gray-500); }
+  body.dark .item-title { color: var(--gray-900); }
+  body.dark .page-title { color: var(--gray-900); }
+  body.dark .topbar-title { color: var(--gray-900); }
+  body.dark .card-title { color: var(--gray-800); }
+  body.dark .pipeline-col { background: rgba(255,255,255,0.04); }
+  body.dark .pipeline-card { border-color: var(--gray-200); }
+  body.dark .empty { color: var(--gray-500); }
+  body.dark .goal-progress { background: var(--gray-200); }
+  body.dark .loading-overlay {
+    background: linear-gradient(135deg, #0b1220, #111a2e, #1f2a44);
+  }
+  body.dark .pin-input {
+    background: var(--gray-200);
+    border-color: var(--gray-300);
+    color: var(--gray-900);
+  }
+  body.dark .task-type-pill.today { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+  body.dark .task-type-pill.followup { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+  body.dark .task-type-pill.content { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; }
+  body.dark .task-type-pill.urgent { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+
+  /* Badge adjustments for dark mode */
+  body.dark .badge-new-lead, body.dark .badge-ongoing { background: rgba(59,130,246,0.2); color: #93c5fd; }
+  body.dark .badge-contacted { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+  body.dark .badge-replied { background: rgba(139,92,246,0.2); color: #c4b5fd; }
+  body.dark .badge-interested, body.dark .badge-pending, body.dark .badge-medium { background: rgba(245,158,11,0.2); color: #fcd34d; }
+  body.dark .badge-meeting { background: rgba(236,72,153,0.2); color: #f9a8d4; }
+  body.dark .badge-proposal-sent { background: rgba(34,211,238,0.2); color: #67e8f9; }
+  body.dark .badge-won, body.dark .badge-paid { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+  body.dark .badge-lost, body.dark .badge-high { background: rgba(239,68,68,0.2); color: #fca5a5; }
+  body.dark .badge-support { background: rgba(139,92,246,0.2); color: #c4b5fd; }
+  body.dark .badge-low { background: var(--gray-200); color: var(--gray-600); }
+
+  /* ============= NEW COMPONENTS ============= */
+  .daily-stats-row {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: var(--radius);
+    padding: 12px 8px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-100);
+    cursor: pointer;
+    gap: 4px;
+  }
+  .daily-stat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    min-width: 0;
+    padding: 4px;
+  }
+  .daily-icon { font-size: 14px; }
+  .daily-value { font-size: 18px; font-weight: 800; color: var(--gray-900); line-height: 1; }
+  .daily-label { font-size: 10px; color: var(--gray-500); font-weight: 600; }
+
+  .task-type-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    margin-left: 4px;
+  }
+  .task-type-pill.today { background: var(--danger-light); color: var(--danger); }
+  .task-type-pill.followup { background: var(--warning-light); color: var(--warning); }
+  .task-type-pill.content { background: var(--purple-light); color: var(--purple); }
+  .task-type-pill.urgent { background: var(--success-light); color: var(--success); }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div style="font-size: 14px; opacity: 0.85;">جاري التحميل...</div>
+</div>
+
+<!-- Login -->
+<div class="login-overlay" id="login" style="display: none;">
+  <div class="login-box">
+    <div class="login-logo">د</div>
+    <div class="login-title">Home Dashboard</div>
+    <div class="login-subtitle">أدخل الـ PIN للدخول</div>
+    <input type="password" inputmode="numeric" pattern="[0-9]*" class="pin-input" id="pin-input" maxlength="20" placeholder="••••" autocomplete="off">
+    <div class="pin-error" id="pin-error"></div>
+    <button class="btn btn-primary" style="width: 100%;" onclick="handleLogin()">دخول</button>
+    <div style="margin-top: 16px; font-size: 11px; color: var(--gray-400);">بياناتك محفوظة بشكل آمن في السحابة 🔒</div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div class="app" id="app" style="display: none;">
+
+  <header class="topbar">
+    <div class="topbar-title" id="topbar-title">🏠 الرئيسية</div>
+    <div class="topbar-actions">
+      <div class="save-indicator" id="save-indicator">
+        <span class="dot"></span>
+        <span id="save-text">محفوظ</span>
+      </div>
+      <button class="icon-btn-top" onclick="toggleDarkMode()" id="theme-toggle" title="تبديل المظهر">🌙</button>
+      <button class="icon-btn-top" onclick="openMenu()" title="القائمة">⋯</button>
+    </div>
+  </header>
+
+  <main class="content" id="content"></main>
+
+  <button class="btn-fab" id="fab" onclick="handleFab()" style="display: none;">+</button>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-view="home"><span class="nav-icon">🏠</span><span class="nav-label">الرئيسية</span></button>
+    <button class="nav-btn" data-view="clients"><span class="nav-icon">👥</span><span class="nav-label">العملاء</span><span class="nav-badge" id="nav-clients">0</span></button>
+    <button class="nav-btn" data-view="outreach"><span class="nav-icon">🎯</span><span class="nav-label">CRM</span><span class="nav-badge" id="nav-outreach">0</span></button>
+    <button class="nav-btn" data-view="content"><span class="nav-icon">🎥</span><span class="nav-label">المحتوى</span></button>
+    <button class="nav-btn" data-view="brain"><span class="nav-icon">🧠</span><span class="nav-label">Brain</span><span class="nav-badge" id="nav-brain">0</span></button>
+  </nav>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Modal container -->
+<div id="modal-root"></div>
+
+<script>
+/* ============================================================
+   DEFAULT DATA
+============================================================ */
+const DEFAULT = {
+  clients: [
+    {
+      id: 1, name: 'أحمد', project: 'Shopify Store',
+      status: 'ongoing', nextAction: 'تعديل الهوم', payment: 'paid',
+      price: 15000, paymentDate: '2026-06-10', contact: '01012345678',
+      links: [{ label: 'Store', url: 'https://example.com' }],
+      tasks: [
+        { id: 1, title: 'تصميم الهوم بيدج', type: 'design', done: false },
+        { id: 2, title: 'إضافة صفحات المنتج', type: 'pages', done: true }
+      ],
+      notes: [{ id: 1, text: 'العميل طلب تغيير اللون الأساسي للأزرق', date: '2026-06-15' }]
+    },
+    {
+      id: 2, name: 'محمد', project: 'Shopify Store',
+      status: 'support', nextAction: 'متابعة المنتجات', payment: 'pending',
+      price: 5000, paymentDate: '2026-06-20', contact: '01198765432',
+      links: [],
+      tasks: [{ id: 1, title: 'إضافة 10 منتجات', type: 'pages', done: false }],
+      notes: []
+    }
+  ],
+  outreach: [
+    { id: 1, brand: 'Brand A', instagram: '@branda', status: 'Contacted', lastContact: '2026-06-14', followUp: '2026-06-18' },
+    { id: 2, brand: 'Brand B', instagram: '@brandb', status: 'Interested', lastContact: '2026-06-15', followUp: '2026-06-17' }
+  ],
+  contentIdeas: [
+    { id: 1, idea: 'أخطاء Shopify', type: 'Reel', priority: 'high' },
+    { id: 2, idea: 'Case Study', type: 'Carousel', priority: 'high' },
+    { id: 3, idea: 'Landing Pages', type: 'Reel', priority: 'medium' }
+  ],
+  contentPipeline: {
+    ideas: [{ id: 1, title: '5 أخطاء Shopify شائعة', type: 'Reel' }],
+    script: [{ id: 2, title: 'Case Study - أحمد', type: 'Carousel' }],
+    record: [],
+    edit: [],
+    scheduled: [{ id: 3, title: 'Landing Page Tips', type: 'Reel', date: '2026-06-20' }],
+    published: [{ id: 4, title: 'مقدمة Shopify', type: 'Reel', date: '2026-06-10' }]
+  },
+  revenue: [
+    { id: 1, client: 'أحمد', amount: 15000, date: '2026-06-10' },
+    { id: 2, client: 'محمد', amount: 5000, date: '2026-06-15' }
+  ],
+  expenses: [
+    { id: 1, item: 'Internet', cost: 500, date: '2026-06-01' },
+    { id: 2, item: 'Tools', cost: 800, date: '2026-06-01' },
+    { id: 3, item: 'Ads', cost: 1000, date: '2026-06-05' }
+  ],
+  brain: [
+    { id: 1, type: 'saas', text: 'أداة لتتبع Shopify analytics', date: '2026-06-15' },
+    { id: 2, type: 'content', text: 'فكرة Reel عن الـ A/B Testing', date: '2026-06-16' }
+  ],
+  goals: {
+    q3: {
+      recurringClients: { current: 2, target: 5, label: 'أول 5 عملاء دائمين' },
+      monthlyRevenue: { current: 20000, target: 50000, label: '50 ألف جنيه شهريًا' },
+      caseStudies: { current: 0, target: 3, label: '3 Case Studies قوية' },
+      followers: { current: 350, target: 1000, label: '1000 متابع مستهدف' }
+    },
+    weekly: { outreachSent: 0, replies: 0, newClients: 0, contentPublished: 0, revenue: 0, week: '' }
+  },
+  sops: [
+    { id: 1, title: 'طريقة تسليم موقع Shopify', steps: '1. مراجعة التصميم النهائي\n2. اختبار كل الصفحات\n3. إضافة المنتجات\n4. ضبط SEO\n5. تسليم للعميل مع شرح' },
+    { id: 2, title: 'طريقة الـ Outreach', steps: '1. بحث عن البراند\n2. تحضير رسالة مخصصة\n3. إرسال أول رسالة\n4. متابعة بعد 3 أيام\n5. تسجيل في CRM' },
+    { id: 3, title: 'طريقة استقبال العميل', steps: '1. رسالة ترحيب\n2. جمع البيانات المطلوبة\n3. إرسال Proposal\n4. توقيع العقد\n5. بدء العمل' },
+    { id: 4, title: 'طريقة كتابة Proposal', steps: '1. فهم احتياج العميل\n2. تحديد Scope\n3. حساب السعر\n4. تحديد Timeline\n5. إرسال للعميل' }
+  ],
+  tasks: {
+    today: [
+      { id: 1, title: 'تعديل هوم صفحة أحمد', priority: 'high', done: false },
+      { id: 2, title: 'متابعة محمد بخصوص الدفع', priority: 'high', done: false },
+      { id: 3, title: 'كتابة Case Study', priority: 'medium', done: false }
+    ],
+    followups: [
+      { id: 1, title: 'Brand A - متابعة', date: '2026-06-18', done: false },
+      { id: 2, title: 'Brand B - متابعة', date: '2026-06-17', done: false }
+    ],
+    contentToPublish: [
+      { id: 1, title: 'Reel: Landing Page Tips', date: '2026-06-20', done: false }
+    ],
+    urgentClient: [
+      { id: 1, title: 'أحمد - تعديل الهوم', client: 'أحمد', done: false }
+    ]
+  },
+  stats: {
+    messagesToday: 12, repliesToday: 5, meetings: 2,
+    closedDeals: 1, leadsThisMonth: 18, contentPublished: 6
+  }
+};
+
+/* ============================================================
+   STATE & API (localStorage + optional GitHub Gist cloud sync)
+============================================================ */
+let data = null;
+let currentView = 'home';
+let saveTimer = null;
+let isSaving = false;
+let cloudAvailable = false; // detected at boot
+
+const PIN_KEY = 'hd_pin';
+const CACHE_KEY = 'hd_cache_v1';
+
+function getPin() { return localStorage.getItem(PIN_KEY) || ''; }
+function setPin(p) { localStorage.setItem(PIN_KEY, p); }
+function clearPin() { localStorage.removeItem(PIN_KEY); }
+
+function saveCache() {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch {}
+}
+function loadCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+async function apiGet() {
+  const pin = getPin();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000); // 8s timeout
+  try {
+    const res = await fetch('/api/data', {
+      headers: { Authorization: 'Bearer ' + pin },
+      cache: 'no-store',
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (res.status === 401) {
+      const j = await res.json().catch(() => ({}));
+      if (j.error === 'INVALID_PIN') {
+        clearPin();
+        showLogin();
+        throw new Error('Unauthorized');
+      }
+      throw new Error('UNAUTHORIZED_UNKNOWN');
+    }
+    if (res.status === 500) {
+      const j = await res.json().catch(() => ({}));
+      if (j.error === 'GIST_NOT_CONFIGURED' || j.error === 'PIN_NOT_SET') {
+        throw new Error('NOT_CONFIGURED');
+      }
+      throw new Error('SERVER_ERROR');
+    }
+    if (!res.ok) throw new Error('GET failed: ' + res.status);
+    cloudAvailable = true;
+    return res.json();
+  } catch (e) {
+    clearTimeout(timeout);
+    if (e.name === 'AbortError') throw new Error('TIMEOUT');
+    throw e;
+  }
+}
+
+async function apiSave(payload) {
+  if (isSaving) return;
+  isSaving = true;
+  showSaveState('saving');
+  try {
+    const pin = getPin();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch('/api/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + pin },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (res.status === 401) {
+      const j = await res.json().catch(() => ({}));
+      if (j.error === 'INVALID_PIN') {
+        clearPin();
+        showLogin();
+        throw new Error('Unauthorized');
+      }
+    }
+    if (res.status === 500) {
+      const j = await res.json().catch(() => ({}));
+      if (j.error === 'GIST_NOT_CONFIGURED' || j.error === 'PIN_NOT_SET') {
+        cloudAvailable = false;
+        showSaveState('local');
+        return;
+      }
+      throw new Error('Save failed: ' + res.status);
+    }
+    if (!res.ok) throw new Error('Save failed: ' + res.status);
+    cloudAvailable = true;
+    showSaveState('saved');
+  } catch (e) {
+    if (e.name === 'AbortError' || e.message === 'TIMEOUT') {
+      cloudAvailable = false;
+      showSaveState('local');
+    } else if (e.message === 'NOT_CONFIGURED' || e.message === 'SERVER_ERROR') {
+      cloudAvailable = false;
+      showSaveState('local');
+    } else if (e.message === 'Unauthorized') {
+      // already handled
+    } else {
+      showSaveState('local'); // be optimistic - local cache saved
+      console.warn('Save error (cached locally):', e.message);
+    }
+  } finally {
+    isSaving = false;
+  }
+}
+
+function saveData() {
+  // ALWAYS save locally first (instant, never loses)
+  saveCache();
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    apiSave(data);
+  }, 700);
+}
+
+function showSaveState(state) {
+  const el = document.getElementById('save-indicator');
+  const txt = document.getElementById('save-text');
+  el.classList.add('show');
+  el.classList.remove('saving');
+  if (state === 'saving') {
+    el.classList.add('saving');
+    txt.textContent = 'جاري الحفظ...';
+  } else if (state === 'saved') {
+    txt.textContent = cloudAvailable ? 'محفوظ ✓' : 'محفوظ محلياً ✓';
+    setTimeout(() => el.classList.remove('show'), 1800);
+  } else if (state === 'local') {
+    txt.textContent = 'محفوظ محلياً ✓';
+    setTimeout(() => el.classList.remove('show'), 1800);
+  } else {
+    txt.textContent = 'فشل الحفظ';
+    setTimeout(() => el.classList.remove('show'), 2000);
+  }
+}
+
+/* ============================================================
+   AUTH
+============================================================ */
+async function handleLogin() {
+  const pin = document.getElementById('pin-input').value.trim();
+  const errEl = document.getElementById('pin-error');
+  if (!pin) { errEl.textContent = 'اكتب الـ PIN'; return; }
+  errEl.textContent = '';
+  try {
+    const res = await fetch('/api/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin })
+    });
+    const j = await res.json();
+    if (j.ok) {
+      setPin(pin);
+      hideLogin();
+      await loadData();
+    } else {
+      errEl.textContent = j.error === 'PIN_NOT_SET' ? 'PIN مش متظبط على السيرفر' : 'PIN غلط';
+    }
+  } catch (e) {
+    errEl.textContent = 'مشكلة في الاتصال';
+  }
+}
+
+document.getElementById('pin-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+
+function showLogin() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('login').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  setTimeout(() => document.getElementById('pin-input').focus(), 100);
+}
+
+function hideLogin() {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+}
+
+/* ============================================================
+   LOAD DATA (Local First - shows instantly, syncs in background)
+============================================================ */
+async function loadData() {
+  // 1) Show local data IMMEDIATELY (no waiting for network)
+  const cache = loadCache();
+  try {
+    data = cache ? normalizeData(cache) : structuredClone(DEFAULT);
+  } catch (e) {
+    console.warn('Cache corrupted, using defaults:', e);
+    data = structuredClone(DEFAULT);
+    saveCache();
+  }
+  if (!cache) saveCache();
+
+  // 2) Hide loading and render RIGHT AWAY (user sees data instantly)
+  try { document.getElementById('loading').style.display = 'none'; } catch {}
+  try {
+    render();
+    updateNavBadges();
+  } catch (e) {
+    console.error('Render failed:', e);
+    showRenderError(e);
+    return;
+  }
+
+  // 3) Sync with cloud in BACKGROUND (non-blocking)
+  setTimeout(() => syncWithCloud(), 50);
+}
+
+async function syncWithCloud() {
+  try {
+    const remote = await apiGet();
+    if (remote && typeof remote === 'object' && Object.keys(remote).length > 0) {
+      const normalized = normalizeData(remote);
+      data = normalized;
+      saveCache();
+      render();
+      updateNavBadges();
+      console.log('✅ Synced from cloud');
+      cloudAvailable = true;
+    } else {
+      console.log('☁️ Cloud empty, pushing local data up');
+      cloudAvailable = true;
+      apiSave(data);
+    }
+  } catch (e) {
+    if (e.message === 'Unauthorized') return;
+    if (e.message === 'NOT_CONFIGURED') {
+      cloudAvailable = false;
+      console.warn('⚠️ Cloud not configured (using localStorage)');
+      // Don't show toast on every load - too annoying
+    } else {
+      cloudAvailable = false;
+      console.warn('⚠️ Cloud error:', e.message);
+    }
+  }
+}
+
+function normalizeData(d) {
+  // Ensures all expected fields exist with defaults, even if user data is partial
+  const result = structuredClone(DEFAULT);
+  if (!d || typeof d !== 'object') return result;
+  try {
+    for (const key of Object.keys(result)) {
+      if (d[key] === undefined || d[key] === null) continue;
+      if (Array.isArray(result[key])) {
+        result[key] = Array.isArray(d[key]) ? d[key] : result[key];
+      } else if (typeof result[key] === 'object' && result[key] !== null) {
+        result[key] = { ...result[key], ...(d[key] || {}) };
+      } else {
+        result[key] = d[key];
+      }
+    }
+    // Also keep any custom keys user added
+    for (const key of Object.keys(d)) {
+      if (!(key in result)) result[key] = d[key];
+    }
+  } catch (e) {
+    console.warn('Normalize failed:', e);
+  }
+  return result;
+}
+
+function showRenderError(e) {
+  const c = document.getElementById('content');
+  c.innerHTML = `
+    <div class="card" style="text-align: center; padding: 32px 16px;">
+      <div style="font-size: 40px; margin-bottom: 12px;">😵</div>
+      <div style="font-weight: 700; margin-bottom: 8px;">حصل خطأ في العرض</div>
+      <div style="font-size: 12px; color: var(--gray-500); margin-bottom: 16px;">${escapeHtml(String(e.message || e))}</div>
+      <button class="btn btn-primary" onclick="resetApp()">🔄 Reset App</button>
+    </div>
+  `;
+  document.getElementById('loading').style.display = 'none';
+}
+
+/* ============================================================
+   HELPERS
+============================================================ */
+function uid() { return Date.now() + Math.floor(Math.random() * 1000); }
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  try {
+    return new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+  } catch { return d; }
+}
+
+function formatMoney(n) {
+  return new Intl.NumberFormat('en-EG').format(n || 0) + ' ج.م';
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  setTimeout(() => { el.className = 'toast ' + type; }, 2200);
+}
+
+function updateNavBadges() {
+  if (!data) return;
+  document.getElementById('nav-clients').textContent = data.clients.length;
+  document.getElementById('nav-outreach').textContent = data.outreach.length;
+  document.getElementById('nav-brain').textContent = data.brain.length;
+}
+
+function monthRevenue() {
+  const now = new Date();
+  return (data.revenue || [])
+    .filter(r => { const d = new Date(r.date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); })
+    .reduce((s, r) => s + (r.amount || 0), 0);
+}
+
+function monthExpenses() {
+  const now = new Date();
+  return (data.expenses || [])
+    .filter(e => { const d = new Date(e.date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); })
+    .reduce((s, e) => s + (e.cost || 0), 0);
+}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+const VIEW_TITLES = {
+  home: '🏠 الرئيسية',
+  clients: '👥 العملاء',
+  outreach: '🎯 Outreach CRM',
+  content: '🎥 Content Planner',
+  finance: '💰 Finance',
+  brain: '🧠 Brain Dump',
+  goals: '📈 Company Goals',
+  sops: '🔄 SOPs',
+  more: '⋯ المزيد'
+};
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentView = btn.dataset.view;
+    render();
+  });
+});
+
+function switchView(v) {
+  currentView = v;
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === v);
+  });
+  closeSheet();
+  closeMenuSheet();
+  render();
+}
+
+function handleFab() {
+  if (currentView === 'home') openTaskModal('today');
+  else if (currentView === 'clients') openClientModal();
+  else if (currentView === 'outreach') openOutreachModal();
+  else if (currentView === 'content') openContentIdeaModal();
+  else if (currentView === 'finance') openRevenueModal();
+  else if (currentView === 'brain') document.getElementById('bd-text')?.focus();
+  else if (currentView === 'sops') openSOPModal();
+  else if (currentView === 'goals') openWeeklyModal();
+}
+
+/* ============================================================
+   RENDER
+============================================================ */
+function render() {
+  const c = document.getElementById('content');
+  const fab = document.getElementById('fab');
+  document.getElementById('topbar-title').textContent = VIEW_TITLES[currentView] || 'Home Dashboard';
+  fab.style.display = 'none';
+  switch (currentView) {
+    case 'home': c.innerHTML = renderHome(); fab.style.display = 'flex'; break;
+    case 'clients': c.innerHTML = renderClients(); fab.style.display = 'flex'; break;
+    case 'outreach': c.innerHTML = renderOutreach(); fab.style.display = 'flex'; break;
+    case 'content': c.innerHTML = renderContent(); fab.style.display = 'flex'; break;
+    case 'finance': c.innerHTML = renderFinance(); break;
+    case 'brain': c.innerHTML = renderBrain(); break;
+    case 'goals': c.innerHTML = renderGoals(); break;
+    case 'sops': c.innerHTML = renderSOPs(); fab.style.display = 'flex'; break;
+    default: c.innerHTML = renderHome();
+  }
+  updateNavBadges();
+  bindEvents();
+}
+
+/* ============================================================
+   HOME (simplified)
+============================================================ */
+function renderHome() {
+  const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: '2-digit', month: 'long' });
+  const allTasks = getAllTasks();
+  const pendingCount = allTasks.filter(t => !t.done).length;
+
+  return `
+    <div class="page-header">
+      <div class="page-title">مرحباً 👋</div>
+      <div class="page-subtitle">${today}</div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card info">
+        <div class="stat-icon" style="background: var(--info-light); color: var(--info);">🎯</div>
+        <div class="stat-value">${data.stats.leadsThisMonth}</div>
+        <div class="stat-label">Leads الشهر</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon" style="background: var(--purple-light); color: var(--purple);">👥</div>
+        <div class="stat-value">${data.clients.length}</div>
+        <div class="stat-label">العملاء</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-icon" style="background: var(--success-light); color: var(--success);">💰</div>
+        <div class="stat-value small">${formatMoney(monthRevenue())}</div>
+        <div class="stat-label">إيرادات الشهر</div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-icon" style="background: var(--warning-light); color: var(--warning);">🎥</div>
+        <div class="stat-value">${data.stats.contentPublished}</div>
+        <div class="stat-label">محتوى اتنشر</div>
+      </div>
+    </div>
+
+    <div class="daily-stats-row" onclick="openDailyStats()">
+      <div class="daily-stat">
+        <span class="daily-icon">📨</span>
+        <span class="daily-value">${data.stats.messagesToday}</span>
+        <span class="daily-label">رسائل</span>
+      </div>
+      <div class="daily-stat">
+        <span class="daily-icon">💬</span>
+        <span class="daily-value">${data.stats.repliesToday}</span>
+        <span class="daily-label">ردود</span>
+      </div>
+      <div class="daily-stat">
+        <span class="daily-icon">📅</span>
+        <span class="daily-value">${data.stats.meetings}</span>
+        <span class="daily-label">meetings</span>
+      </div>
+      <div class="daily-stat">
+        <span class="daily-icon">✅</span>
+        <span class="daily-value">${data.stats.closedDeals}</span>
+        <span class="daily-label">closed</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-icon" style="background: var(--primary-light); color: var(--primary);">🎯</div>مهامي</div>
+        <span class="number-pill">${pendingCount}</span>
+      </div>
+      ${renderUnifiedTasks(allTasks)}
+      <div class="quick-add">
+        <select class="select" id="add-task-type" style="max-width: 115px; font-size: 13px;">
+          <option value="today">🔥 Today</option>
+          <option value="followups">📞 Follow</option>
+          <option value="contentToPublish">🎥 Content</option>
+          <option value="urgentClient">⚡ Urgent</option>
+        </select>
+        <input class="input" placeholder="مهمة جديدة..." id="add-task" autocomplete="off">
+        <button class="btn btn-primary btn-sm" onclick="addTaskTyped()">+</button>
+      </div>
+    </div>
+  `;
+}
+
+function getAllTasks() {
+  const all = [];
+  if (!data || !data.tasks) return all;
+  for (const t of (data.tasks.today || [])) all.push({ ...t, type: 'today' });
+  for (const t of (data.tasks.followups || [])) all.push({ ...t, type: 'followup' });
+  for (const t of (data.tasks.contentToPublish || [])) all.push({ ...t, type: 'content' });
+  for (const t of (data.tasks.urgentClient || [])) all.push({ ...t, type: 'urgent' });
+  // Sort: incomplete first, then by type priority (urgent > today > followup > content)
+  const priority = { urgent: 0, today: 1, followup: 2, content: 3 };
+  all.sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    return (priority[a.type] ?? 9) - (priority[b.type] ?? 9);
+  });
+  return all;
+}
+
+function typeLabel(t) {
+  return { today: 'Today', followup: 'Follow', content: 'Content', urgent: 'Urgent' }[t] || t;
+}
+
+function renderUnifiedTasks(list) {
+  if (!list.length) return '<div class="empty"><div class="empty-icon">📝</div>مفيش مهام - ضيف واحدة من تحت</div>';
+  return '<ul class="task-list">' + list.map(t => `
+    <li class="task-item">
+      <div class="task-check ${t.done ? 'checked' : ''}" onclick="toggleTask('${t.id}')">${t.done ? '✓' : ''}</div>
+      <div class="task-content">
+        <div class="task-title ${t.done ? 'done' : ''}">${escapeHtml(t.title)}</div>
+        <div class="task-meta">
+          <span class="task-type-pill ${t.type}">${typeLabel(t.type)}</span>
+          ${t.date ? `<span style="margin-right: 6px;">📅 ${formatDate(t.date)}</span>` : ''}
+          ${t.client ? `<span>👤 ${escapeHtml(t.client)}</span>` : ''}
+          ${t.priority && t.priority !== 'medium' ? `<span class="badge badge-${t.priority}" style="margin-right: 4px;">${t.priority}</span>` : ''}
+        </div>
+      </div>
+      <button class="task-delete" onclick="deleteTask('${t.id}')">🗑️</button>
+    </li>
+  `).join('') + '</ul>';
+}
+
+function addTaskTyped() {
+  const input = document.getElementById('add-task');
+  const typeEl = document.getElementById('add-task-type');
+  if (!input || !input.value.trim()) return;
+  const type = typeEl ? typeEl.value : 'today';
+  const obj = { id: uid(), title: input.value.trim(), done: false };
+  if (type === 'today') obj.priority = 'medium';
+  else obj.date = todayStr();
+  if (!data.tasks[type]) data.tasks[type] = [];
+  data.tasks[type].push(obj);
+  input.value = '';
+  saveData();
+  render();
+}
+
+function renderTaskItems(list) {
+  if (!list.length) return '<div class="empty"><div class="empty-icon">📝</div>مفيش مهام هنا</div>';
+  return '<ul class="task-list">' + list.map(t => `
+    <li class="task-item">
+      <div class="task-check ${t.done ? 'checked' : ''}" onclick="toggleTask('${t.id}')">${t.done ? '✓' : ''}</div>
+      <div class="task-content">
+        <div class="task-title ${t.done ? 'done' : ''}">${escapeHtml(t.title)}</div>
+        ${t.date ? `<div class="task-meta">📅 ${formatDate(t.date)}</div>` : ''}
+        ${t.client ? `<div class="task-meta">👤 ${escapeHtml(t.client)}</div>` : ''}
+        ${t.priority ? `<span class="badge badge-${t.priority}">${t.priority}</span>` : ''}
+      </div>
+      <button class="task-delete" onclick="deleteTask('${t.id}')">🗑️</button>
+    </li>
+  `).join('') + '</ul>';
+}
+
+function addTask(type) {
+  const map = { today: 'add-today', followups: 'add-followup', contentToPublish: 'add-content', urgentClient: 'add-urgent' };
+  const input = document.getElementById(map[type]);
+  if (!input || !input.value.trim()) return;
+  const obj = { id: uid(), title: input.value.trim(), done: false };
+  if (type === 'today') obj.priority = 'medium';
+  if (type !== 'today') obj.date = todayStr();
+  data.tasks[type].push(obj);
+  input.value = '';
+  saveData();
+  render();
+}
+
+function toggleTask(id) {
+  // Search across home tasks and client tasks
+  for (const key in data.tasks) {
+    if (Array.isArray(data.tasks[key])) {
+      const t = data.tasks[key].find(x => String(x.id) === String(id));
+      if (t) { t.done = !t.done; saveData(); render(); return; }
+    }
+  }
+  data.clients.forEach(c => {
+    const t = c.tasks.find(x => String(x.id) === String(id));
+    if (t) t.done = !t.done;
+  });
+  saveData();
+  render();
+}
+
+function deleteTask(id) {
+  for (const key in data.tasks) {
+    if (Array.isArray(data.tasks[key])) {
+      const before = data.tasks[key].length;
+      data.tasks[key] = data.tasks[key].filter(x => String(x.id) !== String(id));
+      if (data.tasks[key].length < before) { saveData(); render(); return; }
+    }
+  }
+  data.clients.forEach(c => {
+    c.tasks = c.tasks.filter(x => String(x.id) !== String(id));
+  });
+  saveData();
+  render();
+}
+
+function openTaskModal(type) {
+  const labels = { today: "Today's Focus", followups: 'Follow-up', contentToPublish: 'محتوى للنشر', urgentClient: 'شغل عاجل' };
+  showSheet(`إضافة لـ ${labels[type]}`, `
+    <div class="form-group">
+      <label class="form-label">العنوان</label>
+      <input class="input" id="tm-title" placeholder="اكتب هنا..." autofocus>
+    </div>
+    ${type === 'today' ? `<div class="form-group"><label class="form-label">الأولوية</label><select class="select" id="tm-priority"><option value="high">عالي</option><option value="medium">متوسط</option><option value="low">منخفض</option></select></div>` : ''}
+    <div class="sheet-footer">
+      <button class="btn btn-primary" onclick="saveTaskModal('${type}')">إضافة</button>
+      <button class="btn btn-secondary" onclick="closeSheet()">إلغاء</button>
+    </div>
+  `);
+}
+
+function saveTaskModal(type) {
+  const title = document.getElementById('tm-title').value.trim();
+  if (!title) return;
+  const obj = { id: uid(), title, done: false };
+  if (type === 'today') obj.priority = document.getElementById('tm-priority')?.value || 'medium';
+  else obj.date = todayStr();
+  data.tasks[type].push(obj);
+  closeSheet();
+  saveData();
+  render();
+}
+
+/* ============================================================
+   CLIENTS
+============================================================ */
+function renderClients() {
+  if (!data.clients.length) return '<div class="empty"><div class="empty-icon">👥</div>مفيش عملاء. ضيف أول عميل.</div>';
+  return `
+    <div class="page-header">
+      <div class="page-title">العملاء</div>
+      <div class="page-subtitle">${data.clients.length} عميل</div>
+    </div>
+    <div class="item-list">
+      ${data.clients.map(c => `
+        <div class="item-card" onclick="openClientDetail(${c.id})">
+          <div class="item-row">
+            <div style="flex: 1; min-width: 0;">
+              <div class="item-title">${escapeHtml(c.name)}</div>
+              <div class="item-meta">
+                <span>${escapeHtml(c.project)}</span>
+                <span class="badge badge-${c.status}">${statusLabel(c.status)}</span>
+                <span class="badge badge-${c.payment}">${paymentLabel(c.payment)}</span>
+              </div>
+              <div style="font-size: 12px; color: var(--gray-600); margin-top: 6px;">
+                👉 ${escapeHtml(c.nextAction)}
+              </div>
+            </div>
+            <div class="item-actions">
+              <button class="task-delete" onclick="event.stopPropagation(); deleteClient(${c.id})">🗑️</button>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function statusLabel(s) { return { ongoing: 'Ongoing', support: 'Support' }[s] || s; }
+function paymentLabel(s) { return { paid: 'Paid', pending: 'Pending' }[s] || s; }
+
+function openClientDetail(id) {
+  const c = data.clients.find(x => x.id === id);
+  if (!c) return;
+  const linksHtml = (c.links || []).map(l => `<a href="${escapeHtml(l.url)}" target="_blank" class="link-pill">🔗 ${escapeHtml(l.label)}</a>`).join('') || '<span class="text-muted" style="font-size: 12px;">مفيش لينكات</span>';
+
+  showSheet(`${c.name}`, `
+    <div style="text-align: center; margin-bottom: 16px;">
+      <div style="font-size: 13px; color: var(--gray-500); margin-bottom: 4px;">${escapeHtml(c.project)}</div>
+      <span class="badge badge-${c.status}">${statusLabel(c.status)}</span>
+      <span class="badge badge-${c.payment}" style="margin-right: 6px;">${paymentLabel(c.payment)}</span>
+    </div>
+
+    <div class="card" style="margin-bottom: 12px; padding: 12px;">
+      <div class="detail-row"><span class="detail-label">التواصل</span><span class="detail-value">${escapeHtml(c.contact || '—')}</span></div>
+      <div class="detail-row"><span class="detail-label">السعر</span><span class="detail-value">${formatMoney(c.price)}</span></div>
+      <div class="detail-row"><span class="detail-label">تاريخ الدفع</span><span class="detail-value">${formatDate(c.paymentDate)}</span></div>
+      <div class="detail-row"><span class="detail-label">Next Action</span><span class="detail-value">${escapeHtml(c.nextAction)}</span></div>
+      <div class="detail-row" style="flex-direction: column; align-items: stretch;">
+        <span class="detail-label" style="margin-bottom: 6px;">اللينكات</span>
+        <div>${linksHtml}</div>
+      </div>
+    </div>
+
+    <div class="section-title">Tasks</div>
+    <div class="tabs" id="client-tabs">
+      <div class="tab active" data-tab="all">الكل</div>
+      <div class="tab" data-tab="design">تصميم</div>
+      <div class="tab" data-tab="pages">صفحات</div>
+      <div class="tab" data-tab="tracking">Tracking</div>
+      <div class="tab" data-tab="seo">SEO</div>
+    </div>
+    <div id="client-tasks-list">${renderTaskItems(c.tasks)}</div>
+    <div class="quick-add">
+      <input class="input" placeholder="تاسك جديد..." id="add-client-task" autocomplete="off">
+      <button class="btn btn-primary btn-sm" onclick="addClientTask(${c.id})">+</button>
+    </div>
+
+    <div class="section-title">Notes</div>
+    <div id="client-notes">
+      ${(c.notes || []).map(n => `
+        <div class="note-item">
+          ${escapeHtml(n.text)}
+          <div class="note-meta">
+            <span>${formatDate(n.date)}</span>
+            <button class="icon-btn-top" style="width: 28px; height: 28px; font-size: 12px;" onclick="deleteClientNote(${c.id}, ${n.id})">🗑️</button>
+          </div>
+        </div>
+      `).join('') || '<div class="empty" style="padding: 16px;"><div class="empty-icon">📌</div>مفيش ملاحظات</div>'}
+    </div>
+    <div class="form-group" style="margin-top: 8px;">
+      <textarea class="textarea" id="add-client-note" placeholder="ملاحظة جديدة..." rows="2"></textarea>
+    </div>
+    <button class="btn btn-secondary btn-sm" style="width: 100%;" onclick="addClientNote(${c.id})">+ إضافة ملاحظة</button>
+
+    <div class="sheet-footer">
+      <button class="btn btn-secondary" onclick="openClientModal(${c.id})">✏️ تعديل البيانات</button>
+      <button class="btn btn-danger" onclick="deleteClient(${c.id})">🗑️ حذف</button>
+    </div>
+  `, true);
+
+  bindClientTabs(id);
+}
+
+function bindClientTabs(clientId) {
+  document.querySelectorAll('#client-tabs .tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('#client-tabs .tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      const c = data.clients.find(x => x.id === clientId);
+      const filtered = t.dataset.tab === 'all' ? c.tasks : c.tasks.filter(x => x.type === t.dataset.tab);
+      document.getElementById('client-tasks-list').innerHTML = renderTaskItems(filtered);
+    });
+  });
+}
+
+function addClientTask(clientId) {
+  const input = document.getElementById('add-client-task');
+  if (!input.value.trim()) return;
+  const c = data.clients.find(x => x.id === clientId);
+  c.tasks.push({ id: uid(), title: input.value.trim(), type: 'pages', done: false });
+  saveData();
+  openClientDetail(clientId);
+}
+
+function addClientNote(clientId) {
+  const input = document.getElementById('add-client-note');
+  if (!input.value.trim()) return;
+  const c = data.clients.find(x => x.id === clientId);
+  c.notes = c.notes || [];
+  c.notes.push({ id: uid(), text: input.value.trim(), date: todayStr() });
+  saveData();
+  openClientDetail(clientId);
+}
+
+function deleteClientNote(clientId, noteId) {
+  const c = data.clients.find(x => x.id === clientId);
+  c.notes = c.notes.filter(n => n.id !== noteId);
+  saveData();
+  openClientDetail(clientId);
+}
+
+function openClientModal(client = null) {
+  const c = client || { name:'', project:'', status:'ongoing', nextAction:'', payment:'pending', price:0, paymentDate:todayStr(), contact:'' };
+  closeSheet();
+  setTimeout(() => {
+    showSheet(client ? 'تعديل عميل' : 'عميل جديد', `
+      <div class="form-group">
+        <label class="form-label">الاسم</label>
+        <input class="input" id="cm-name" value="${escapeHtml(c.name)}" autofocus>
+      </div>
+      <div class="form-group">
+        <label class="form-label">المشروع</label>
+        <input class="input" id="cm-project" value="${escapeHtml(c.project)}">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="select" id="cm-status">
+            <option value="ongoing" ${c.status==='ongoing'?'selected':''}>Ongoing</option>
+            <option value="support" ${c.status==='support'?'selected':''}>Support</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment</label>
+          <select class="select" id="cm-payment">
+            <option value="paid" ${c.payment==='paid'?'selected':''}>Paid</option>
+            <option value="pending" ${c.payment==='pending'?'selected':''}>Pending</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Next Action</label>
+        <input class="input" id="cm-action" value="${escapeHtml(c.nextAction)}">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">السعر (ج.م)</label>
+          <input class="input" type="number" id="cm-price" value="${c.price}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">تاريخ الدفع</label>
+          <input class="input" type="date" id="cm-date" value="${c.paymentDate}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">رقم التواصل</label>
+        <input class="input" id="cm-contact" value="${escapeHtml(c.contact)}">
+      </div>
+      <div class="sheet-footer">
+        <button class="btn btn-primary" onclick="saveClient(${client ? client.id : 'null'})">حفظ</button>
+        <button class="btn btn-secondary" onclick="closeSheet()">إلغاء</button>
+      </div>
+    `);
+  }, 100);
+}
+
+function saveClient(id) {
+  const obj = {
+    name: document.getElementById('cm-name').value.trim(),
+    project: document.getElementById('cm-project').value.trim(),
+    status: document.getElementById('cm-status').value,
+    payment: document.getElementById('cm-payment').value,
+    nextAction: document.getElementById('cm-action').value.trim(),
+    price: parseFloat(document.getElementById('cm-price').value) || 0,
+    paymentDate: document.getElementById('cm-date').value,
+    contact: document.getElementById('cm-contact').value.trim()
+  };
+  if (!obj.name) { toast('اكتب اسم العميل', 'error'); return; }
+  if (id) {
+    Object.assign(data.clients.find(c => c.id === id), obj);
+  } else {
+    data.clients.push({ id: uid(), ...obj, links: [], tasks: [], notes: [] });
+  }
+  closeSheet();
+  saveData();
+  render();
+  toast('تم الحفظ ✓', 'success');
+}
+
+function deleteClient(id) {
+  if (!confirm('متأكد من حذف العميل؟')) return;
+  data.clients = data.clients.filter(c => c.id !== id);
+  closeSheet();
+  saveData();
+  render();
+}
+
+/* ============================================================
+   OUTREACH
+============================================================ */
+function renderOutreach() {
+  return `
+    <div class="page-header">
+      <div class="page-title">Outreach CRM</div>
+      <div class="page-subtitle">${data.outreach.length} براند</div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card info"><div class="stat-label">رسائل اليوم</div><div class="stat-value">${data.stats.messagesToday}</div></div>
+      <div class="stat-card success"><div class="stat-label">ردود اليوم</div><div class="stat-value">${data.stats.repliesToday}</div></div>
+      <div class="stat-card purple"><div class="stat-label">Meetings</div><div class="stat-value">${data.stats.meetings}</div></div>
+      <div class="stat-card warning"><div class="stat-label">Closed</div><div class="stat-value">${data.stats.closedDeals}</div></div>
+    </div>
+
+    ${data.outreach.length ? `
+      <div class="item-list">
+        ${data.outreach.map(o => `
+          <div class="item-card" onclick="openOutreachModal(${o.id})">
+            <div class="item-row">
+              <div style="flex: 1; min-width: 0;">
+                <div class="item-title">${escapeHtml(o.brand)}</div>
+                <div class="item-meta">
+                  <span>${escapeHtml(o.instagram)}</span>
+                  <span class="badge badge-${outreachStatus(o.status)}">${o.status}</span>
+                </div>
+                <div style="font-size: 12px; color: var(--gray-600); margin-top: 6px;">
+                  آخر تواصل: ${formatDate(o.lastContact)} · 📅 متابعة: <strong>${formatDate(o.followUp)}</strong>
+                </div>
+              </div>
+              <div class="item-actions">
+                <button class="task-delete" onclick="event.stopPropagation(); deleteOutreach(${o.id})">🗑️</button>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    ` : '<div class="empty"><div class="empty-icon">🎯</div>مفيش براندات</div>'}
+  `;
+}
+
+function outreachStatus(s) { return s.toLowerCase().replace(/\s+/g, '-'); }
+
+function openOutreachModal(o = null) {
+  const item = o || { brand:'', instagram:'', status:'New Lead', lastContact:todayStr(), followUp:'' };
+  closeSheet();
+  setTimeout(() => {
+    showSheet(o ? 'تعديل Brand' : 'Brand جديد', `
+      <div class="form-group">
+        <label class="form-label">Brand</label>
+        <input class="input" id="om-brand" value="${escapeHtml(item.brand)}" autofocus>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Instagram</label>
+        <input class="input" id="om-ig" value="${escapeHtml(item.instagram)}" placeholder="@brand">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="select" id="om-status">
+          ${['New Lead','Contacted','Replied','Interested','Meeting','Proposal Sent','Won','Lost'].map(s => `<option ${item.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Last Contact</label>
+          <input class="input" type="date" id="om-last" value="${item.lastContact}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Follow Up</label>
+          <input class="input" type="date" id="om-follow" value="${item.followUp}">
+        </div>
+      </div>
+      <div class="sheet-footer">
+        <button class="btn btn-primary" onclick="saveOutreach(${o ? o.id : 'null'})">حفظ</button>
+        <button class="btn btn-secondary" onclick="closeSheet()">إلغاء</button>
+      </div>
+    `);
+  }, 100);
+}
+
+function saveOutreach(id) {
+  const obj = {
+    brand: document.getElementById('om-brand').value.trim(),
+    instagram: document.getElementById('om-ig').value.trim(),
+    status: document.getElementById('om-status').value,
+    lastContact: document.getElementById('om-last').value,
+    followUp: document.getElementById('om-follow').value
+  };
+  if (!obj.brand) { toast('اكتب اسم البراند', 'error'); return; }
+  if (id) Object.assign(data.outreach.find(o => o.id === id), obj);
+  else data.outreach.push({ id: uid(), ...obj });
+  closeSheet();
+  saveData();
+  render();
+  toast('تم الحفظ ✓', 'success');
+}
+
+function deleteOutreach(id) {
+  if (!confirm('حذف البراند؟')) return;
+  data.outreach = data.outreach.filter(o => o.id !== id);
+  saveData();
+  render();
+}
+
+/* ============================================================
+   CONTENT
+============================================================ */
+function renderContent() {
+  const p = data.contentPipeline;
+  return `
+    <div class="page-header">
+      <div class="page-title">Content Planner</div>
+      <div class="page-subtitle">${data.contentIdeas.length} فكرة</div>
+    </div>
+
+    <div class="section-title">📝 Content Ideas</div>
+    ${data.contentIdeas.length ? `
+      <div class="item-list">
+        ${data.contentIdeas.map(i => `
+          <div class="item-card" onclick="openContentIdeaModal(${i.id})">
+            <div class="item-row">
+              <div style="flex: 1; min-width: 0;">
+                <div class="item-title">${escapeHtml(i.idea)}</div>
+                <div class="item-meta">
+                  <span>${escapeHtml(i.type)}</span>
+                  <span class="badge badge-${i.priority}">${i.priority}</span>
+                </div>
+              </div>
+              <button class="task-delete" onclick="event.stopPropagation(); deleteContentIdea(${i.id})">🗑️</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    ` : '<div class="empty"><div class="empty-icon">💡</div>مفيش أفكار</div>'}
+
+    <div class="section-title">📊 Content Pipeline</div>
+    <div class="pipeline">
+      ${['ideas','script','record','edit','scheduled','published'].map(stage => `
+        <div class="pipeline-col">
+          <div class="pipeline-header">
+            <span class="pipeline-title">${stageLabel(stage)}</span>
+            <span class="pipeline-count">${p[stage].length}</span>
+          </div>
+          ${p[stage].map(item => `
+            <div class="pipeline-card" onclick="moveCardPrompt(${JSON.stringify(item).replace(/"/g,'&quot;')}, '${stage}')">
+              <div class="pipeline-card-title">${escapeHtml(item.title)}</div>
+              <div class="pipeline-card-meta">${escapeHtml(item.type)}${item.date ? ' · ' + formatDate(item.date) : ''}</div>
+            </div>
+          `).join('')}
+          <button class="btn btn-ghost btn-sm" style="width:100%; margin-top:4px; background: white; color: var(--gray-600); border: 1px dashed var(--gray-300);" onclick="addToPipeline('${stage}')">+ إضافة</button>
+        </div>
+      `).join('')}
+    </div>
+    <div style="font-size: 11px; color: var(--gray-500); text-align: center; margin-top: 8px;">
+      💡 اسحب يمين/شمال أو اضغط على أي كارت لنقله للمرحلة اللي بعدها
+    </div>
+  `;
+}
+
+function stageLabel(s) { return { ideas:'Ideas', script:'Script', record:'Record', edit:'Edit', scheduled:'Scheduled', published:'Published' }[s]; }
+
+function moveCardPrompt(itemStr, currentStage) {
+  const stages = ['ideas','script','record','edit','scheduled','published'];
+  const idx = stages.indexOf(currentStage);
+  if (idx === stages.length - 1) { toast('المحتوى ده متشهر خلاص', 'error'); return; }
+  const item = JSON.parse(itemStr.replace(/&quot;/g,'"'));
+  const next = stages[idx + 1];
+  showSheet('نقل إلى: ' + stageLabel(next), `
+    <div class="card" style="margin-bottom: 12px;">
+      <div style="font-weight: 700; margin-bottom: 4px;">${escapeHtml(item.title)}</div>
+      <div style="font-size: 12px; color: var(--gray-500);">من: ${stageLabel(currentStage)} ← إلى: ${stageLabel(next)}</div>
+    </div>
+    ${(next === 'scheduled' || next === 'published') ? `
+      <div class="form-group">
+        <label class="form-label">التاريخ</label>
+        <input class="input" type="date" id="mv-date" value="${item.date || todayStr()}">
+      </div>
+    ` : ''}
+    <div class="sheet-footer">
+      <button class="btn btn-primary" onclick="confirmMove('${currentStage}', '${next}', '${itemStr.replace(/'/g,"\\'")}')">نقل</button>
+      <button class="btn btn-secondary" onclick="closeSheet()">إلغاء</button>
+    </div>
+  `);
+}
+
+function confirmMove(from, to, itemStr) {
+  const item = JSON.parse(itemStr.replace(/&quot;/g,'"').replace(/\\'/g, "'"));
+  data.contentPipeline[from] = data.contentPipeline[from].filter(x => x.id !== item.id);
+  if ((to === 'scheduled' || to === 'published')) {
+    item.date = document.getElementById('mv-date')?.value || todayStr();
+  }
+  data.contentPipeline[to].push(item);
+  closeSheet();
+  saveData();
+  render();
+}
+
+function addToPipeline(stage) {
+  closeSheet();
+  setTimeout(() => {
+    showSheet('إضافة لـ ' + stageLabel(stage), `
+      <div class="form-group">
+        <label class="form-label">العنوان</label>
+        <input class="input" id="ap-title" autofocus>
+      </div>
+      <div class="form-group">
+        <label class="form-label">النوع</label>
+        <select class="select" id="ap-type">
+          <option>Reel</option><option>Carousel</option><option>Post</option><option>Story</option>
+        </select>
+      </div>
+      ${(stage === 'scheduled' || stage === 'published') ? `
+        <div class="form-group">
+          <label class="form-label">التاريخ</label>
+          <input class="input" type="date" id="ap-date" value="${todayStr()}">
+        </div>
+      ` : ''}
+      <div class="sheet-footer">
+        <button class="btn btn-primary" onclick="savePipelineItem('${stage}')">إضافة</button>
+        <button class="btn btn-secondary" onclick="closeSheet()">إلغاء</button>
+      </div>
+    `);
+  }, 100);
+}
+
+function savePipelineItem(stage) {
+  const obj = { id: uid(), title: document.getElementById('ap-title').value.trim() || 'بدون عنوان', type: document.getElementById('ap-type').value };
+  if (stage === 'scheduled' || stage === 'published') obj.date = document.getElementById('ap-date')?.value || todayStr();
+  data.contentPipeline[stage].push(obj);
+  closeSheet();
+  saveData();
+  render();
+}
+
+function openContentIdeaModal(item = null) {
+  const i = item || { idea:'', type:'Reel', priority:'medium' };
+  closeSheet();
+  setTimeout(() => {
+    showSheet(item ? 'تعديل فكرة' : 'فكرة جديدة', `
+      <div class="form-group">
+        <label class="form-label">الفكرة</label>
+        <input class="input" id="ci-idea" value="${escapeHtml(i.idea)}" autofocus>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">النوع</label>
+          <select class="select" id="ci-type">
+            ${['Reel','Carousel','Post','Story'].map(t => `<option ${i.type===t?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">الأولوية</label>
+          <select class="select" id="ci-priority">
+            <option value="high" ${i.priority==='high'?'selected':''}>High</option>
+            <option value="medium" ${i.priority==='medium'?'selected':''}>Medium</option>
+            <option value="low" ${i.priority==='low'?'selected':''}>Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="sheet-footer">
+        <button class="btn btn-primary" onclick="saveContentIdea(${item ? item.id : 'null'})">حفظ</button>
+        <button class="btn btn-secondary" onclick="closeSheet()">إلغاء</button>
+      </div>
+    `);
+  }, 100);
+}
+
+function saveContentIdea(id) {
+  const obj = {
+    idea: document.getElementById('ci-idea').value.trim() || 'بدون عنوان',
+    type: document.getElementById('ci-type').value,
+    priority: document.getElementById('ci-priority').value
+  };
+  if (id) Object.assign(data.contentIdeas.find(i => i.id === id), obj);
+  else data.contentIdeas.push({ id: uid(), ...obj });
+  closeSheet();
+  saveData();
+  render();
+}
+
+function deleteContentIdea(id) {
+  if (!confirm('حذف الفكرة؟')) return;
+  data.contentIdeas = data.contentIdeas.filter(i => i.id !== id);
+  saveData();
+  render();
+}
+
+/* ============================================================
+   FINANCE
+============================================================ */
+function renderFinance() {
+  const rev = monthRevenue();
+  const exp = monthExpenses();
+  const net = rev - exp;
+  const target = data.goals.q3.monthlyRevenue.target;
+  const pct = Math.min(100, (rev / target) * 100);
+  return `
+    <div class="page-header">
+      <div class="page-title">Finance</div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card success">
+        <div class="stat-icon" style="background: var(--success-light); color: var(--success);">💵</div>
+        <div class="stat-value small">${formatMoney(rev)}</div>
+        <div class="stat-label">إيرادات الشهر</div>
+        <div class="goal-progress" style="margin-top: 8px;"><div class="goal-progress-fill" style="width: ${pct}%; background: linear-gradient(90deg, var(--success), #14b8a6);"></div></div>
+        <div style="font-size: 11px; color: var(--gray-500); margin-top: 4px;">${Math.round(pct)}% من ${formatMoney(target)}</div>
+      </div>
+      <div class="stat-card danger">
+        <div class="stat-icon" style="background: var(--danger-light); color: var(--danger);">💸</div>
+        <div class="stat-value small">${formatMoney(exp)}</div>
+        <div class="stat-label">مصروفات الشهر</div>
+      </div>
+      <div class="stat-card ${net >= 0 ? 'success' : 'danger'}">
+        <div class="stat-icon" style="background: ${net >= 0 ? 'var(--success-light)' : 'var(--danger-light)'}; color: ${net >= 0 ? 'var(--success)' : 'var(--danger)'};">📊</div>
+        <div class="stat-value small">${formatMoney(net)}</div>
+        <div class="stat-label">صافي الربح</div>
+      </div>
+      <div class="stat-card info">
+        <div class="stat-icon" style="background: var(--info-light); color: var(--info);">🎯</div>
+        <div class="stat-value small">${formatMoney(target)}</div>
+        <div class="stat-label">Target الشهر</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-icon" style="background: var(--success-light); color: var(--success);">💵</div>Revenue</div>
+        <button class="btn btn-primary btn-sm" onclick="openRevenueModal()">+</button>
+      </div>
+      ${(data.revenue || []).length ? (data.revenue || []).map(r => `
+        <div class="finance-row">
+          <div>
+            <div style="font-weight: 600;">${escapeHtml(r.client)}</div>
+            <div class="text-muted" style="font-size: 11px;">${formatDate(r.date)}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="text-success" style="font-weight: 700;">${formatMoney(r.amount)}</span>
+            <button class="task-delete" onclick="deleteRevenue(${r.id})">🗑️</button>
+          </div>
+        </div>
+      `).join('') : '<div class="empty"><div class="empty-icon">💵</div>مفيش إيرادات</div>'}
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-icon" style="background: var(--danger-light); color: var(--danger);">💸</div>Expenses</div>
+        <button class="btn btn-primary btn-sm" onclick="openExpenseModal()">+</button>
+      </div>
+      ${(data.expenses || []).length ? (data.expenses || []).map(e => `
+        <div class="finance-row">
+          <div>
+            <div style="font-weight: 600;">${escapeHtml(e.item)}</div>
+            <div class="text-muted" style="font-size: 11px;">${formatDate(e.date)}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="text-danger" style="font-weight: 700;">${formatMoney(e.cost)}</span>
+            <button class="task-delete" onclick="deleteExpense(${e.id})">🗑️</button>
+          </div>
+        </div>
+      `).join('') : '<div class="empty"><div class="empty-icon">💸</div>مفيش مصروفات</div>'}
+    </div>
+  `;
+}
+
+function openRevenueModal() {
+  closeSheet();
+  setTimeout(() => {
+    showSheet('إيراد جديد', `
+      <div class="form-group">
+        <label class="form-label">العميل</label>
+        <input class="input" id="rv-client" autofocus>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">المبلغ (ج.م)</label>
+          <input class="input" type="number" id="rv-amount">
+        </div>
+        <div class="form-group">
+          <label class="form-label">التاريخ</label>
+          <input class="input" type="date" id="rv-date" value="${todayStr()}">
+        </div>
+      </div>
+      <div class="sheet-footer">
+        <button class="btn btn-primary" onclick="saveRevenue()">حفظ</button>
+        <button class="btn btn-secondary" onclick="closeSheet()">إلغاء</button>
+      </div>
+    `);
+  }, 100);
+}
+
+function saveRevenue() {
+  data.revenue.push({
+    id: uid(),
+    client: document.getElementById('rv-client').value.trim() || 'بدون اسم',
+    amount: parseFloat(document.getElementById('rv-amount').value) || 0,
+    date: document.getElementById('rv-date').value
+  });
+  closeSheet();
+  saveData();
+  render();
+}
+
+function deleteRevenue(id) {
+  data.revenue = data.revenue.filter(r => r.id !== id);
+  saveData();
+  render();
+}
+
+function openExpenseModal() {
+  closeSheet();
+  setTimeout(() => {
+    showSheet('مصروف جديد', `
+      <div class="form-group">
+        <label class="form-label">البند</label>
+        <input class="input" id="ex-item" autofocus>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">التكلفة (ج.م)</label>
+          <input class="input" type="number" id="ex-cost">
+        </div>
+        <div class="form-group">
+          <label class="form-label">التاريخ</label>
+          <input class="input" type="date" id="ex-date" value="${todayStr()}">
+        </div>
+      </div>
+      <div class="sheet-footer">
+        <button class="btn btn-primary" onclick="saveExpense()">حفظ</button>
+        <button class="btn btn-secondary" onclick="closeSheet()">إلغاء</button>
+      </div>
+    `);
+  }, 100);
+}
+
+function saveExpense() {
+  data.expenses.push({
+    id: uid(),
+    item: document.getElementById('ex-item').value.trim() || 'بدون اسم',
+    cost: parseFloat(document.getElementById('ex-cost').value) || 0,
+    date: document.getElementById('ex-date').value
+  });
+  closeSheet();
+  saveData();
+  render();
+}
+
+function deleteExpense(id) {
+  data.expenses = data.expenses.filter(e => e.id !== id);
+  saveData();
+  render();
+}
+
+/* ============================================================
+   BRAIN
+============================================================ */
+function renderBrain() {
+  const types = [
+    { id: 'saas', label: 'SaaS Idea', icon: '💡' },
+    { id: 'content', label: 'Content Idea', icon: '🎥' },
+    { id: 'automation', label: 'Automation', icon: '⚙️' },
+    { id: 'business', label: 'Business Idea', icon: '💼' },
+    { id: 'meeting', label: 'Meeting Notes', icon: '📝' }
+  ];
+  return `
+    <div class="page-header">
+      <div class="page-title">Brain Dump</div>
+      <div class="page-subtitle">فكّر بسرعة، راجع كل أسبوع</div>
+    </div>
+
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">النوع</label>
+        <select class="select" id="bd-type">
+          ${types.map(t => `<option value="${t.id}">${t.icon} ${t.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">فكرتك</label>
+        <textarea class="textarea" id="bd-text" placeholder="اكتب أي فكرة هنا..." rows="3"></textarea>
+      </div>
+      <button class="btn btn-primary" style="width: 100%;" onclick="addBrain()">+ إضافة</button>
+    </div>
+
+    ${types.map(t => {
+      const items = data.brain.filter(b => b.type === t.id);
+      if (!items.length) return '';
+      return `
+        <div class="section-title">${t.icon} ${t.label} <span class="number-pill" style="font-size: 11px;">${items.length}</span></div>
+        ${items.map(b => `
+          <div class="brain-item ${t.id}">
+            <div class="brain-content">
+              <div class="brain-title">${escapeHtml(b.text)}</div>
+              <div class="brain-meta">${formatDate(b.date)}</div>
+            </div>
+            <button class="task-delete" onclick="deleteBrain(${b.id})">🗑️</button>
+          </div>
+        `).join('')}
+      `;
+    }).join('')}
+
+    ${!data.brain.length ? '<div class="empty"><div class="empty-icon">🧠</div>فكّر بحرية، ارمي أفكارك هنا</div>' : ''}
+  `;
+}
+
+function addBrain() {
+  const text = document.getElementById('bd-text').value.trim();
+  const type = document.getElementById('bd-type').value;
+  if (!text) return;
+  data.brain.push({ id: uid(), type, text, date: todayStr() });
+  document.getElementById('bd-text').value = '';
+  saveData();
+  render();
+}
+
+function deleteBrain(id) {
+  data.brain = data.brain.filter(b => b.id !== id);
+  saveData();
+  render();
+}
+
+/* ============================================================
+   GOALS
+============================================================ */
+function renderGoals() {
+  const g = data.goals.q3;
+  return `
+    <div class="page-header">
+      <div class="page-title">Company Goals</div>
+      <div class="page-subtitle">Q3 2026</div>
+    </div>
+
+    <div class="section-title">🎯 الأهداف الرئيسية</div>
+    ${Object.entries(g).map(([key, goal]) => {
+      const pct = Math.min(100, (goal.current / goal.target) * 100);
+      return `
+        <div class="goal-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 700; color: var(--gray-800);">${escapeHtml(goal.label)}</div>
+            <span class="number-pill">${Math.round(pct)}%</span>
+          </div>
+          <div class="goal-progress"><div class="goal-progress-fill" style="width: ${pct}%;"></div></div>
+          <div class="goal-stats">
+            <span class="goal-current">${goal.current.toLocaleString('en-EG')}</span>
+            <span class="goal-target">من ${goal.target.toLocaleString('en-EG')}</span>
+          </div>
+          <button class="btn btn-secondary btn-sm" style="margin-top: 10px; width: 100%;" onclick="updateGoal('${key}')">+ تحديث التقدم</button>
+        </div>
+      `;
+    }).join('')}
+
+    <div class="section-title">📅 Weekly Review</div>
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">الأسبوع</label>
+        <input class="input" id="wk-week" value="${data.goals.weekly.week || ''}" placeholder="مثال: Week 24 - June 2026" oninput="saveWeeklyField()">
+      </div>
+      ${[
+        { key: 'outreachSent', label: 'كام Outreach اتبعت؟', icon: '📤' },
+        { key: 'replies', label: 'كام رد؟', icon: '💬' },
+        { key: 'newClients', label: 'كام عميل جديد؟', icon: '👥' },
+        { key: 'contentPublished', label: 'كام محتوى اتنشر؟', icon: '🎥' },
+        { key: 'revenue', label: 'الإيراد كام؟', icon: '💰' }
+      ].map(item => `
+        <div class="review-day">
+          <span style="font-size: 22px;">${item.icon}</span>
+          <div style="flex: 1;">
+            <div class="form-label" style="margin-bottom: 4px;">${item.label}</div>
+            <input class="input" type="number" id="wk-${item.key}" value="${data.goals.weekly[item.key] || 0}" oninput="saveWeeklyField()">
+          </div>
+        </div>
+      `).join('')}
+      <button class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 8px;" onclick="resetWeekly()">🔄 بداية أسبوع جديد</button>
+    </div>
+  `;
+}
+
+function updateGoal(key) {
+  closeSheet();
+  setTimeout(() => {
+    const goal = data.goals.q3[key];
+    showSheet('تحديث: ' + goal.label, `
+      <div class="form-group">
+        <label class="form-label">القيمة الحالية (من ${goal.target.toLocaleString('en-EG')})</label>
+        <input class="input" type="number" id="ug-current" value="${goal.current}" autofocus>
+      </div>
+      <div class="sheet-footer">
+        <button class="btn btn-primary" onclick="saveGoal('${key}')">حفظ</button>
+        <button class="btn btn-secondary" onclick="closeSheet()">إلغاء</button>
+      </div>
+    `);
+  }, 100);
+}
+
+function saveGoal(key) {
+  data.goals.q3[key].current = parseFloat(document.getElementById('ug-current').value) || 0;
+  closeSheet();
+  saveData();
+  render();
+  toast('تم التحديث ✓', 'success');
+}
+
+function saveWeeklyField() {
+  data.goals.weekly.week = document.getElementById('wk-week').value;
+  data.goals.weekly.outreachSent = parseFloat(document.getElementById('wk-outreachSent').value) || 0;
+  data.goals.weekly.replies = parseFloat(document.getElementById('wk-replies').value) || 0;
+  data.goals.weekly.newClients = parseFloat(document.getElementById('wk-newClients').value) || 0;
+  data.goals.weekly.contentPublished = parseFloat(document.getElementById('wk-contentPublished').value) || 0;
+  data.goals.weekly.revenue = parseFloat(document.getElementById('wk-revenue').value) || 0;
+  saveData();
+}
+
+function resetWeekly() {
+  if (!confirm('ابدأ أسبوع جديد؟ (الأرقام هتتحفظ كـ backup في الكونسول)')) return;
+  console.log('Weekly backup:', JSON.stringify(data.goals.weekly));
+  data.goals.weekly = { outreachSent: 0, replies: 0, newClients: 0, contentPublished: 0, revenue: 0, week: '' };
+  saveData();
+  render();
+  toast('أسبوع جديد جاهز ✓', 'success');
+}
+
+function openWeeklyModal() {
+  toast('استخدم النموذج على الصفحة', 'error');
+}
+
+/* ============================================================
+   SOPs
+============================================================ */
+function renderSOPs() {
+  return `
+    <div class="page-header">
+      <div class="page-title">SOPs</div>
+      <div class="page-subtitle">${data.sops.length} نظام</div>
+    </div>
+
+    ${data.sops.map(s => `
+      <div class="sop-item" onclick="openSOPDetail(${s.id})">
+        <div class="sop-title"><span>📋</span>${escapeHtml(s.title)}</div>
+        <div class="sop-preview">${escapeHtml(s.steps.split('\n').slice(0,2).join(' · '))}</div>
+      </div>
+    `).join('')}
+
+    ${!data.sops.length ? '<div class="empty"><div class="empty-icon">🔄</div>مفيش SOPs. ضيف أول واحد.</div>' : ''}
+  `;
+}
+
+function openSOPDetail(id) {
+  const s = data.sops.find(x => x.id === id);
+  showSheet(s.title, `
+    <div style="background: var(--gray-50); padding: 14px; border-radius: var(--radius-sm); white-space: pre-wrap; line-height: 1.9; font-size: 14px;">${escapeHtml(s.steps)}</div>
+    <div class="sheet-footer">
+      <button class="btn btn-primary" onclick="openSOPModal(${s.id})">✏️ تعديل</button>
+      <button class="btn btn-danger" onclick="deleteSOP(${s.id})">🗑️ حذف</button>
+      <button class="btn btn-secondary" onclick="closeSheet()">إغلاق</button>
+    </div>
+  `, true);
+}
+
+function openSOPModal(sop = null) {
+  const s = sop || { title:'', steps:'' };
+  closeSheet();
+  setTimeout(() => {
+    showSheet(sop ? 'تعديل SOP' : 'SOP جديد', `
+      <div class="form-group">
+        <label class="form-label">العنوان</label>
+        <input class="input" id="sp-title" value="${escapeHtml(s.title)}" autofocus placeholder="مثال: طريقة تسليم الموقع">
+      </div>
+      <div class="form-group">
+        <label class="form-label">الخطوات (كل خطوة في سطر)</label>
+        <textarea class="textarea" id="sp-steps" rows="8" placeholder="1. الخطوة الأولى&#10;2. الخطوة الثانية">${escapeHtml(s.steps)}</textarea>
+      </div>
+      <div class="sheet-footer">
+        <button class="btn btn-primary" onclick="saveSOP(${sop ? sop.id : 'null'})">حفظ</button>
+        <button class="btn btn-secondary" onclick="closeSheet()">إلغاء</button>
+      </div>
+    `);
+  }, 100);
+}
+
+function saveSOP(id) {
+  const obj = {
+    title: document.getElementById('sp-title').value.trim() || 'بدون عنوان',
+    steps: document.getElementById('sp-steps').value.trim()
+  };
+  if (id) Object.assign(data.sops.find(s => s.id === id), obj);
+  else data.sops.push({ id: uid(), ...obj });
+  closeSheet();
+  saveData();
+  render();
+  toast('تم الحفظ ✓', 'success');
+}
+
+function deleteSOP(id) {
+  if (!confirm('حذف الـ SOP؟')) return;
+  data.sops = data.sops.filter(s => s.id !== id);
+  closeSheet();
+  saveData();
+  render();
+}
+
+/* ============================================================
+   SHEETS & MENU
+============================================================ */
+function showSheet(title, content, fullHeight = false) {
+  closeSheet();
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `
+    <div class="sheet-overlay" id="sheet-overlay" onclick="closeSheet()">
+      <div class="sheet" ${fullHeight ? 'style="max-height: 94vh;"' : ''} onclick="event.stopPropagation()">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <div class="sheet-title">${title}</div>
+          <button class="sheet-close" onclick="closeSheet()">✕</button>
+        </div>
+        ${content}
+      </div>
+    </div>
+  `;
+  // autofocus
+  setTimeout(() => {
+    const el = root.querySelector('input[autofocus], textarea[autofocus]');
+    if (el) el.focus();
+  }, 300);
+}
+
+function closeSheet() {
+  document.getElementById('modal-root').innerHTML = '';
+}
+
+function openMenu() {
+  showSheet('⋯ المزيد', `
+    <div class="item-list">
+      <div class="item-card" onclick="switchView('finance')">
+        <div class="item-row">
+          <div>
+            <div class="item-title">💰 Finance</div>
+            <div style="font-size: 12px; color: var(--gray-500); margin-top: 2px;">الإيرادات والمصروفات</div>
+          </div>
+          <span>›</span>
+        </div>
+      </div>
+      <div class="item-card" onclick="switchView('goals')">
+        <div class="item-row">
+          <div>
+            <div class="item-title">📈 Company Goals</div>
+            <div style="font-size: 12px; color: var(--gray-500); margin-top: 2px;">Q3 2026 + Weekly Review</div>
+          </div>
+          <span>›</span>
+        </div>
+      </div>
+      <div class="item-card" onclick="switchView('sops')">
+        <div class="item-row">
+          <div>
+            <div class="item-title">🔄 SOPs</div>
+            <div style="font-size: 12px; color: var(--gray-500); margin-top: 2px;">أنظمة العمل</div>
+          </div>
+          <span>›</span>
+        </div>
+      </div>
+      <div class="item-card" onclick="openDailyStats()">
+        <div class="item-row">
+          <div>
+            <div class="item-title">📊 تحديث أرقام اليوم</div>
+            <div style="font-size: 12px; color: var(--gray-500); margin-top: 2px;">رسائل، ردود، meetings</div>
+          </div>
+          <span>›</span>
+        </div>
+      </div>
+      <div class="item-card" onclick="exportData()">
+        <div class="item-row">
+          <div>
+            <div class="item-title">💾 تصدير / Backup</div>
+            <div style="font-size: 12px; color: var(--gray-500); margin-top: 2px;">حفظ نسخة من البيانات</div>
+          </div>
+          <span>›</span>
+        </div>
+      </div>
+      <div class="item-card" onclick="importData()">
+        <div class="item-row">
+          <div>
+            <div class="item-title">📥 استيراد</div>
+            <div style="font-size: 12px; color: var(--gray-500); margin-top: 2px;">استرجاع من backup</div>
+          </div>
+          <span>›</span>
+        </div>
+      </div>
+      <div class="item-card" onclick="resetApp()" style="border-color: var(--warning-light);">
+        <div class="item-row">
+          <div>
+            <div class="item-title text-warning">🔄 Reset App</div>
+            <div style="font-size: 12px; color: var(--gray-500); margin-top: 2px;">لو الداشبورد مش شغال، ابدأ من جديد</div>
+          </div>
+          <span>›</span>
+        </div>
+      </div>
+      <div class="item-card" onclick="logout()" style="border-color: var(--danger-light);">
+        <div class="item-row">
+          <div>
+            <div class="item-title text-danger">🚪 تسجيل خروج</div>
+            <div style="font-size: 12px; color: var(--gray-500); margin-top: 2px;">مسح الـ PIN من الجهاز</div>
+          </div>
+          <span>›</span>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+function closeMenuSheet() { closeSheet(); }
+
+function openDailyStats() {
+  closeSheet();
+  setTimeout(() => {
+    showSheet('📊 تحديث أرقام اليوم', `
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">رسائل اليوم</label><input class="input" type="number" id="dr-msg" value="${data.stats.messagesToday}"></div>
+        <div class="form-group"><label class="form-label">ردود اليوم</label><input class="input" type="number" id="dr-rep" value="${data.stats.repliesToday}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Meetings</label><input class="input" type="number" id="dr-meet" value="${data.stats.meetings}"></div>
+        <div class="form-group"><label class="form-label">Closed Deals</label><input class="input" type="number" id="dr-deals" value="${data.stats.closedDeals}"></div>
+      </div>
+      <div class="form-group"><label class="form-label">محتوى اتنشر</label><input class="input" type="number" id="dr-content" value="${data.stats.contentPublished}"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Leads الشهر</label><input class="input" type="number" id="dr-leads" value="${data.stats.leadsThisMonth}"></div>
+        <div class="form-group" style="display: flex; align-items: flex-end;">
+          <button class="btn btn-secondary btn-sm" style="width: 100%;" onclick="resetDailyStats()">🔄 تصفير اليوم</button>
+        </div>
+      </div>
+      <div class="sheet-footer">
+        <button class="btn btn-primary" onclick="saveDailyStats()">حفظ</button>
+        <button class="btn btn-secondary" onclick="closeSheet()">إلغاء</button>
+      </div>
+    `);
+  }, 100);
+}
+
+function saveDailyStats() {
+  data.stats.messagesToday = parseInt(document.getElementById('dr-msg').value) || 0;
+  data.stats.repliesToday = parseInt(document.getElementById('dr-rep').value) || 0;
+  data.stats.meetings = parseInt(document.getElementById('dr-meet').value) || 0;
+  data.stats.closedDeals = parseInt(document.getElementById('dr-deals').value) || 0;
+  data.stats.contentPublished = parseInt(document.getElementById('dr-content').value) || 0;
+  data.stats.leadsThisMonth = parseInt(document.getElementById('dr-leads').value) || 0;
+  closeSheet();
+  saveData();
+  render();
+  toast('تم التحديث ✓', 'success');
+}
+
+function resetDailyStats() {
+  data.stats.messagesToday = 0;
+  data.stats.repliesToday = 0;
+  data.stats.meetings = 0;
+  data.stats.closedDeals = 0;
+  closeSheet();
+  setTimeout(openDailyStats, 100);
+}
+
+function exportData() {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'dashboard-backup-' + todayStr() + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  closeSheet();
+  toast('تم تحميل الـ backup ✓', 'success');
+}
+
+function importData() {
+  closeSheet();
+  setTimeout(() => {
+    showSheet('📥 استيراد backup', `
+      <div class="form-group">
+        <label class="form-label">اختار ملف الـ JSON</label>
+        <input type="file" class="input" id="imp-file" accept=".json,application/json">
+      </div>
+      <div style="font-size: 12px; color: var(--gray-500); margin-bottom: 12px; padding: 10px; background: var(--warning-light); border-radius: 8px;">
+        ⚠️ ده هيستبدل كل البيانات الحالية. تأكد إنك عملت backup الأول.
+      </div>
+      <div class="sheet-footer">
+        <button class="btn btn-primary" onclick="doImport()">استيراد</button>
+        <button class="btn btn-secondary" onclick="closeSheet()">إلغاء</button>
+      </div>
+    `);
+  }, 100);
+}
+
+function doImport() {
+  const file = document.getElementById('imp-file').files[0];
+  if (!file) return toast('اختار ملف', 'error');
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const obj = JSON.parse(e.target.result);
+      if (!obj || typeof obj !== 'object') throw new Error('invalid');
+      data = obj;
+      closeSheet();
+      saveData();
+      render();
+      toast('تم الاستيراد ✓', 'success');
+    } catch (err) {
+      toast('ملف غير صالح', 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function logout() {
+  if (!confirm('تسجيل خروج؟ البيانات هتفضل محفوظة في السيرفر.')) return;
+  clearPin();
+  closeSheet();
+  showLogin();
+}
+
+function resetApp() {
+  if (!confirm('⚠️ Reset App هيـ:\n• يمسح الـ PIN من المتصفح\n• يمسح البيانات المحلية (Cache)\n• يرجعك لصفحة الـ Login\n\nالبيانات في السحابة (Gist) مش هتتأثر. اضغط OK للمتابعة.')) return;
+  try {
+    localStorage.clear();
+  } catch {}
+  closeSheet();
+  location.reload();
+}
+
+/* ============================================================
+   THEME (Dark Mode)
+============================================================ */
+const THEME_KEY = 'hd_theme';
+
+function toggleDarkMode() {
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+  updateThemeIcon();
+  // Small haptic-like feedback
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+
+function updateThemeIcon() {
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+}
+
+function applyTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = saved === 'dark' || (!saved && prefersDark);
+  if (isDark) document.body.classList.add('dark');
+  updateThemeIcon();
+}
+function bindEvents() {
+  const addTaskInput = document.getElementById('add-task');
+  if (addTaskInput) {
+    addTaskInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') addTaskTyped();
+    });
+  }
+
+  const bdText = document.getElementById('bd-text');
+  if (bdText) {
+    bdText.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) addBrain();
+    });
+  }
+}
+
+/* ============================================================
+   BOOT
+============================================================ */
+(async function init() {
+  applyTheme();
+  document.getElementById('loading').style.display = 'none';
+  if (!getPin()) {
+    showLogin();
+    return;
+  }
+  await loadData();
+})();
+</script>
+</body>
+</html>
